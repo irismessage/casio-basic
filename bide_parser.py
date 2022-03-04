@@ -1,5 +1,10 @@
+import re
 from enum import Enum
 from pathlib import Path
+
+
+# todo: check accuracy of prog name re
+PROG_CALL_RE = re.compile(r"Prog '([A-Z]+)'")
 
 
 class PartTypes(Enum):
@@ -36,7 +41,11 @@ class ProgramPart(BidePart):
         return contents
 
 
-def parse_file(file: Path) -> list[BidePart]:
+Parts = list[BidePart]
+ProgramMap = dict[str, ProgramPart]
+
+
+def parse_file(file: Path) -> Parts:
     parts = []
     lineno = 0
 
@@ -70,7 +79,7 @@ def parse_file(file: Path) -> list[BidePart]:
     return parts
 
 
-def filter_programs(parts: list[BidePart]) -> dict[str, ProgramPart]:
+def filter_programs(parts: Parts) -> ProgramMap:
     return {p.name: p for p in parts if p.type == PartTypes.PROGRAM}
 
 
@@ -91,6 +100,42 @@ def program_to_bide(program: ProgramPart) -> str:
     ]
     bide = '\n'.join(bide_lines)
     return bide
+
+
+def link_programs(programs: ProgramMap, entry_point_name: str) -> ProgramPart:
+    entry_point = None
+    for name, p in programs.items():
+        if name == entry_point_name:
+            entry_point = p
+            break
+        raise ValueError(f'Program with name "{entry_point_name}" is not present in {programs}.')
+
+    while True:
+        all_linked = True
+
+        # todo: optimise with jumps
+        for num, li in enumerate(entry_point.contents):
+            call = PROG_CALL_RE.match(li)
+            if call:
+                all_linked = False
+            call_name = call[1]
+            call_prog = programs[call_name]
+            # replace program call with full program contents
+            entry_point.contents[num: num + 1] = call_prog.contents
+
+        if all_linked:
+            break
+
+    return entry_point
+
+
+def link_bide(bide_path: Path, out_path: Path, entry_point_name: str):
+    parts = parse_file(bide_path)
+    programs = filter_programs(parts)
+    linked = link_programs(programs, entry_point_name)
+    linked_string = program_to_bide(linked)
+    with open(out_path, 'w') as out_file:
+        out_file.write(linked_string)
 
 
 def main():
