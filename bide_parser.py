@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 # todo: check accuracy of prog name re
-PROG_CALL_RE = re.compile(r"Prog '([A-Z]+)'")
+PROG_CALL_RE = re.compile(r'Prog "([A-Z0-9~]+)"')
 
 
 class PartTypes(Enum):
@@ -85,7 +85,7 @@ def filter_programs(parts: Parts) -> ProgramMap:
 
 def minify(program: ProgramPart):
     lines = program.contents
-    for i in range(len(lines) - 1, 0, -1):
+    for i in range(len(lines) - 1, -1, -1):
         li = lines[i]
         if (not li) or li.startswith("'"):
             del lines[i]
@@ -114,14 +114,15 @@ def link_programs(programs: ProgramMap, entry_point_name: str) -> ProgramPart:
         all_linked = True
 
         # todo: optimise with jumps
-        for num, li in enumerate(entry_point.contents):
+        for i in range(len(entry_point.contents) - 1, -1, -1):
+            li = entry_point.contents[i]
             call = PROG_CALL_RE.match(li)
-            if call:
+            if call is not None:
                 all_linked = False
-            call_name = call[1]
-            call_prog = programs[call_name]
-            # replace program call with full program contents
-            entry_point.contents[num: num + 1] = call_prog.contents
+                call_name = call[1]
+                call_prog = programs[call_name]
+                # replace program call with full program contents
+                entry_point.contents[i:i + 1] = call_prog.contents
 
         if all_linked:
             break
@@ -132,6 +133,8 @@ def link_programs(programs: ProgramMap, entry_point_name: str) -> ProgramPart:
 def link_bide(bide_path: Path, out_path: Path, entry_point_name: str):
     parts = parse_file(bide_path)
     programs = filter_programs(parts)
+    for p in programs.values():
+        minify(p)
     linked = link_programs(programs, entry_point_name)
     linked_string = program_to_bide(linked)
     with open(out_path, 'w') as out_file:
@@ -140,12 +143,8 @@ def link_bide(bide_path: Path, out_path: Path, entry_point_name: str):
 
 def main():
     file = Path('snake.bide')
-    parts = parse_file(file)
-    programs = filter_programs(parts)
-    for p in programs.values():
-        minify(p)
-        print(p)
-        print(p.contents)
+    out = Path('snake_linked.bide')
+    link_bide(file, out, '"SNAKE"')
 
 
 if __name__ == '__main__':
