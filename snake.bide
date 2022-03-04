@@ -1,0 +1,547 @@
+#Program name: "SNAKE"
+#Password: <no password>
+Prog "~01MENU"
+Prog "~09INIT"
+Lbl 1
+Prog "~1COINPT"
+'Prog "~4HITBOX"
+Prog "~2MOVE"
+Prog "~3OFLOW"
+Prog "~4HITBOX"
+Prog "~6DRAW"
+Isz O : Goto 1
+#End of part
+#Program name: 'GASNAKE
+#Password: <no password>
+Prog "~01DMENU"
+
+'Init vars
+Prog "~09INIT"
+
+'Game lp
+Lbl 1
+Prog "~1COINPT"
+Prog "~2MOVE"
+Prog "~3OFLOW"
+Prog "~4HITBOX"
+Prog "~6DRAW"
+'Prog "~W3DS"
+
+'++COUNTER
+Isz O : Goto 1
+#End of part
+#Program name: LISTDELA
+#Password: <no password>
+"Deleting all lists."◢
+For 1 -> X To 26
+	ClrList X
+Next
+#End of part
+#Program name: TEST
+#Password: <no password>
+Do
+	Locate 20, 7, "  "
+	Locate 20, 7, GetKey
+LpWhile 1
+#End of part
+#Program name: ~01DMENU
+#Password: <no password>
+Menu "Debug", "ON", A, "OFF", B
+Lbl A
+1 -> E
+Return
+Lbl B
+0 -> E
+#End of part
+#Program name: ~01MENU
+#Password: <no password>
+Menu "SNAKE ©Joel McBride", "START", A, "CONTROLS", B, "QUIT", C
+Lbl C
+"GOODBYE"
+Stop
+Lbl B
+Prog "~02CMENU"
+Lbl A
+#End of part
+#Program name: ~02CMENU
+#Password: <no password>
+Menu "SELECT LAYOUT", "VA X² &#85;EX ME", A, "↑ ← ↓ → F6", B, "9 5 3 * DEL", C, "CANCEL", D
+Lbl A
+1 -> R
+Goto D
+Lbl B
+2 -> R
+Goto D
+Lbl C
+3 -> R
+Lbl D
+Prog "~01MENU"
+#End of part
+#Program name: ~08DRAW
+#Password: <no password>
+'BOUNDS
+For 1 -> I To 2
+	For List 7[1] -> J To List 7[2]
+		Locate J, List 8[I], Str 5
+	Next
+Next
+For 1 -> I To 2
+	For List 8[1] -> J To List 8[2]
+		Locate List 7[I], J, Str 5
+	Next
+Next
+
+
+'SCORE
+Locate 15, 6, "SCORE"
+Locate 15, 2, "HI"
+Locate 15, 3, U
+
+#End of part
+#Program name: ~09INIT
+#Password: <no password>
+"IN" -> Str 3
+Prog "~DBMSG"
+
+Locate 1, 7, "LOADING"
+'SPRITES
+"●" -> Str 1
+'"⊠"->Str 4
+"§" -> Str 4
+"▪" -> Str 5
+'"▫"->Str 5
+"□" -> Str 6
+"■" -> Str 7
+
+
+'BOUNDS
+1 -> List 7[1]
+14 -> List 7[2]
+1 -> List 8[1]
+7 -> List 8[2]
+
+Prog "~08DRAW"
+
+
+'ENUMERATE VACANT TILES
+ClrList 3
+(List 8[2] - List 8[1] - 1) * (List 7[2] - List 7[1] - 1) -> Dim List 3
+
+
+'SCORE
+1 -> G
+1 -> O
+1 -> S
+G + 1 -> D
+Prog "~5ONEUP"
+
+'CONTROLS
+
+'1 REPLAY
+'2 ^
+'3 5
+
+If Not (1 <= R And R <= 3) :Then
+	2 -> R
+IfEnd
+
+If R = 1 :Then
+	{58, 56, 67, 47, 48} -> List 9
+IfEnd
+If R = 2 :Then
+	{28, 37, 38, 27, 29} -> List 9
+IfEnd
+If R = 3 :Then
+	{54, 52, 63, 43, 44} -> List 9
+IfEnd
+
+
+'POS
+G -> Dim List 1
+Fill(6, List 1)
+G -> Dim List 2
+Fill(4, List 2)
+
+1 -> X
+0 -> Y
+List 9[4] -> Z
+#End of part
+#Program name: ~1COINPT
+#Password: <no password>
+"CO" -> Str 3
+Prog "~DBMSG"
+
+'PAUSE CHECK
+If GetKey = List 9[5] :Then
+	Prog "~PAUSE"
+IfEnd
+
+'QUIT CHECK
+If GetKey = 79 :Then
+	Prog "~9END"
+IfEnd
+If GetKey = 69 :Then
+	Stop
+IfEnd
+
+Prog "~UPIN"
+
+'X,Y VELOS FRM INPUT
+If Z != 0 :Then
+	If (Z = List 9[3] Or Z = List 9[4]) :Then
+		If Z = List 9[3] :Then
+			﹣1 -> X
+		Else 
+			1 -> X
+		IfEnd
+		0 -> Y
+		
+	Else 
+		If Z = List 9[1] Or Z = List 9[2] :Then
+			If Z = List 9[1] :Then
+				﹣1 -> Y
+			Else 
+				1 -> Y
+			IfEnd
+			0 -> X
+			
+		IfEnd
+	IfEnd
+IfEnd
+#End of part
+#Program name: ~2MOVE
+#Password: <no password>
+"MO" -> Str 3
+Prog "~DBMSG"
+Prog "~UPIN"
+
+Dim List 1 -> D
+
+(List 1[D] + X) -> List 1[D + 1]
+(List 2[D] + Y) -> List 2[D + 1]
+#End of part
+#Program name: ~3OFLOW
+#Password: <no password>
+"OF" -> Str 3
+Prog "~DBMSG"
+Prog "~UPIN"
+
+Dim List 1 -> D
+
+If List 1[D] >= List 7[2] :Then
+	Prog "~9END"
+	'Then 1->List 1[D]
+IfEnd
+
+If List 1[D] <= List 7[1] :Then
+	Prog "~9END"
+	'Then 21->List 1[D]
+IfEnd
+
+If List 2[D] >= List 8[2] :Then
+	Prog "~9END"
+	'Then 1->List 2[D]
+IfEnd
+
+If List 2[D] <= List 8[1] :Then
+	Prog "~9END"
+	'Then 7->List 2[D]
+IfEnd
+
+#End of part
+#Program name: ~4HITBOX
+#Password: <no password>
+"HI" -> Str 3
+Prog "~DBMSG"
+Prog "~UPIN"
+
+'CLEAR +SCORE
+Locate 15, 5, "       
+
+'DIE CHK
+If List 3[(List 1[D] - List 7[1]) + (List 2[D] - 1 - List 8[1])(List 7[2] - List 7[1] - 1)] :Then
+	Prog "~9END"
+IfEnd
+
+
+'1UP CHK
+0 -> H
+For 1 -> M To Dim List 5
+	If (List 5[M] = List 1[D]) :Then
+		If (List 6[M] = List 2[D]) :Then
+			Prog "~5ONEUP"
+		IfEnd
+	IfEnd
+	
+Next
+#End of part
+#Program name: ~5ONEUP
+#Password: <no password>
+"ON" -> Str 3
+Prog "~DBMSG"
+'ADD SCORE
+Isz G : 0
+1 -> H
+(S + G ^ 2) -> S
+Locate 15, 5, "+"
+Locate 16, 5, G ^ 2
+
+
+'SPAWN 1UP
+ClrList 5
+ClrList 6
+RanInt#(List 7[1] + 1, List 7[2] - 1) -> List 5[1]
+RanInt#(List 8[1] + 1, List 8[2] - 1) -> List 6[1]
+'COLLISION CHECK
+Do
+	
+	0 -> F
+	
+	
+	If List 3[(List 5[1] - List 7[1]) + (List 6[1] - 1 - List 8[1])(List 7[2] - List 7[1] - 1)] :Then
+		1 -> F
+		
+		List 6[1] + 1 -> List 6[1]
+		If List 6[1] >= List 8[2] :Then
+			List 8[1] + 1 -> List 6[1]
+			
+			List 5[1] + 1 -> List 5[1]
+			If List 5[1] >= List 7[2] :Then
+				List 7[1] + 1 -> List 5[1]
+			IfEnd
+		IfEnd
+		
+	IfEnd
+	
+LpWhile F
+
+
+'RENDER
+For 1 -> K To Dim List 5
+	Locate List 5[K], List 6[K], Str 4
+Next
+#End of part
+#Program name: ~6DRAW
+#Password: <no password>
+"DR" -> Str 3
+Prog "~DBMSG"
+Prog "~UPIN"
+
+Locate 15, 7, S
+
+'Dim List 1->D
+'
+'If D!=Dim List 2
+	'Then "Dimension ERROR"◢
+'IfEnd
+'
+'
+If Not H :Then
+	Locate List 1[(D - G)], List 2[(D - G)], "·"
+	0 -> List 3[(List 1[(D - G)] - List 7[1]) + (List 2[(D - G)] - 1 - List 8[1])(List 7[2] - List 7[1] - 1)]
+IfEnd
+
+Locate List 1[D], List 2[D], Str 1
+1 -> List 3[(List 1[(D)] - List 7[1]) + (List 2[(D)] - 1 - List 8[1])(List 7[2] - List 7[1] - 1)]
+#End of part
+#Program name: ~91RMENU
+#Password: <no password>
+Menu "THANKS FOR PLAYING", "RESTART", A, "QUIT", B
+Lbl B
+"GOODBYE"
+Stop
+Lbl A
+Prog "~92CLSCR"
+Prog ""SNAKE""
+#End of part
+#Program name: ~92CLSCR
+#Password: <no password>
+For 1 -> I To 7
+	ClrText
+	For 1 -> J To 21
+		Locate J, I, " "
+	Next
+Next
+#End of part
+#Program name: ~9END
+#Password: <no password>
+For 1 -> J To 5
+	Locate List 1[D], List 2[D], Str 6
+	Prog "~W+"
+	Locate List 1[D], List 2[D], Str 7
+	Prog "~W+"
+Next
+Locate List 1[D], List 2[D], Str 6
+
+"GAME OVER" -> Str 2
+6 -> V
+4 -> W
+Prog "~WPRINT"
+
+'"THANKS FOR PLAYING"
+
+If S >= U :Then
+	S -> U
+	Locate 1, 2, "HISCORE!"
+IfEnd
+
+'Stop
+Prog "~91RMENU"
+#End of part
+#Program name: ~DBMSG
+#Password: <no password>
+If E :Then
+	Locate 1, 7, Str 3
+IfEnd
+#End of part
+#Program name: ~HITBOX-
+#Password: <no password>
+"HI" -> Str 3
+Prog "~DBMSG"
+Prog "~UPIN"
+
+'DIE CHK
+For (D - G) + 1 -> M To (D - 2)
+	
+	If (List 1[M] = List 1[D]) :Then
+		If (List 2[M] = List 2[D]) :Then
+			Prog "~9END"
+		IfEnd
+	IfEnd
+	
+Next
+
+
+'1UP CHK
+Locate 15, 5, "       "
+0 -> H
+For 1 -> M To Dim List 5
+	If (List 5[M] = List 1[D]) :Then
+		If (List 6[M] = List 2[D]) :Then
+			Prog "~5ONEUP"
+		IfEnd
+	IfEnd
+	
+Next
+#End of part
+#Program name: ~PAUSE
+#Password: <no password>
+Not RanInt#(0, 25) -> B
+If B :Then
+	Prog "~08DRAW"
+	"The WORLD: STOP TIME" -> Str 2
+	1 -> V
+	1 -> W
+	Prog "~WPRINT"
+Else 
+	Locate 20, 1, "P"
+IfEnd
+
+Do
+LpWhile GetKey = List 9[5]
+Do
+LpWhile Not (GetKey = List 9[5])
+
+If B :Then
+	"Time has begun to  " -> Str 2
+	6 -> W
+	Prog "~WPRINT"
+	"move again." -> Str 2
+	7 -> W
+	Prog "~WPRINT"
+	Locate 15, 1, "      "
+	Locate 1, 6, "              "
+	Prog "~08DRAW"
+Else 
+	Locate 20, 1, " "
+	Prog "~W3DS"
+IfEnd
+#End of part
+#Program name: ~UPIN
+#Password: <no password>
+
+If GetKey != 0 :Then
+	GetKey -> Z
+IfEnd
+#End of part
+#Program name: ~W+
+#Password: <no password>
+"W+" -> Str 3
+Prog "~DBMSG"
+'10000Lp≈13Sec
+50 -> I
+Lbl 1
+Dsz I : Goto 1
+#End of part
+#Program name: ~W3DS
+#Password: <no password>
+"W3" -> Str 3
+Prog "~DBMSG"
+'30Lp≈1Sec
+'10->I
+3 -> I
+Lbl 1
+ddx(X² + X + 1, 9.9949) -> Z
+Dsz I : Goto 1
+#End of part
+#Program name: ~WPRINT
+#Password: <no password>
+For 1 -> J To StrLen(Str 2)
+	Locate V, W, StrLeft(Str 2, J)
+	Prog "~W3DS"
+Next
+#End of part
+#Program name: ~XTODO
+#Password: <no password>
+'FIX LIST 9 OUT OF RANGE BUG
+'FIX 1UP SPAWN HIDING
+'ALTER COLLISION TO ALLOW CLOSE CALLS
+'CLEAN,ORGANISE CODE
+'IGNORE BACKTRACK INPUT
+'USE DIFFERENT LISTS
+'ADD CHEAT MENU
+'OPTIMISE ~5ONEUP
+'QUICK RESTART
+#End of part
+#Program name: ~XVARKEY
+#Password: <no password>
+'B               ;)
+'D       Dim List 1
+'E        DEBUG SET
+'F   1UP SPAWN FAIL
+'G       LENGTH LIM
+'H         1UP FLAG
+'I~Q      ITERATORS
+' I       ~W3DS
+' J       ~WPRINT
+' K       ~ONEUP
+' L       ~2MOVE
+' M       ~4HITBOX
+' O       GAME LP
+' P       ~θTRIMLS
+'R   LAST CONTROLS
+'S            SCORE
+'U          HISCORE
+'V~W  WPRINT COORDS
+'X~Y    CO﹣ORD VELO
+'Z         KEYPRESS
+'
+'List 1~2   CO﹣ORDS
+'List 3~4   VACANCY
+'List 5~6   PICKUPS
+'List 7~8    BOUNDS
+'List 9    CONTROLS
+' [1]      U
+' [2]      D
+' [3]      L
+' [4]      R
+' [5]      PAUSE
+
+'Str 1    PC SPRITE
+'Str 2   WPRINTStr 
+'Str 3  PROG STATUS
+'Str 4   1UP SPRITE
+'Str 5  WALL SPRITE
+'Str 6 DEATH2SPRITE
+'Str 7 DEATH1SPRITE
+#End of part
