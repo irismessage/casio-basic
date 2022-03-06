@@ -1,5 +1,6 @@
 import re
 import string
+from argparse import ArgumentParser
 from enum import Enum
 from pathlib import Path
 
@@ -164,10 +165,20 @@ def link_bide(bide_path: Path, out_path: Path, entry_point_name: str):
         out_file.write(linked_string)
 
 
+def get_parser() -> ArgumentParser:
+    parser = ArgumentParser()
+
+    parser.add_argument('-i', '--input', type=Path, default='snake.bide')
+    parser.add_argument('-o', '--output', type=Path, default='snake_linked.bide')
+    parser.add_argument('-e', '--entry', default='"SNAKE"', help='Name of the entry point program to link')
+
+    return parser
+
+
 def main():
-    file = Path('snake.bide')
-    out = Path('snake_linked.bide')
-    link_bide(file, out, '"SNAKE"')
+    parser = get_parser()
+    args = parser.parse_args()
+    link_bide(args.input, args.output, args.entry)
 
 
 if __name__ == '__main__':
