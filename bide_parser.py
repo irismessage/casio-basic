@@ -7,7 +7,7 @@ from pathlib import Path
 
 # todo: check accuracy of prog name re
 PROG_CALL_RE = re.compile('Prog "([A-Z0-9~]+)"')
-LBL_RE = re.compile('^Lbl ([A-Z0-9])$')
+LBL_RE = re.compile('^Lbl ([A-Z0-9])$', re.MULTILINE)
 LBL_F = 'Lbl {}'
 GOTO_F = 'Goto {}'
 
@@ -108,20 +108,20 @@ def program_to_bide(program: ProgramPart) -> str:
 
 
 def label_reassignment(programs: ProgramMap):
-    available = [*string.ascii_uppercase, *string.digits]
+    # todo: handle menu, check for other jump statements
+    available = [*string.digits, *string.ascii_uppercase]
 
     for p in programs.values():
         contents = '\n'.join(p.contents)
         all_lbls = LBL_RE.findall(contents)
         for lbl_match in all_lbls:
             try:
-                new_lbl = available.pop()
+                new_lbl = available.pop(0)
             except IndexError as e:
                 raise IndexError('Out of labels') from e
 
-            old_lbl = lbl_match[1]
-            contents.replace(LBL_F.format(old_lbl), LBL_F.format(new_lbl))
-            contents.replace(GOTO_F.format(old_lbl), GOTO_F.format(new_lbl))
+            contents = contents.replace(LBL_F.format(lbl_match), LBL_F.format(new_lbl))
+            contents = contents.replace(GOTO_F.format(lbl_match), GOTO_F.format(new_lbl))
 
         p.contents = contents.splitlines()
 
@@ -159,6 +159,7 @@ def link_bide(bide_path: Path, out_path: Path, entry_point_name: str):
     programs = filter_programs(parts)
     for p in programs.values():
         minify(p)
+    label_reassignment(programs)
     linked = link_programs(programs, entry_point_name)
     linked_string = program_to_bide(linked)
     with open(out_path, 'w') as out_file:
