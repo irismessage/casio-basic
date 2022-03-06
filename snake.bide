@@ -75,7 +75,6 @@ Goto D
 Lbl C
 3 -> R
 Lbl D
-Prog "~01MENU"
 #End of part
 #Program name: ~08DRAW
 #Password: <no password>

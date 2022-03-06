@@ -1,10 +1,14 @@
 import re
+import string
 from enum import Enum
 from pathlib import Path
 
 
 # todo: check accuracy of prog name re
-PROG_CALL_RE = re.compile(r'Prog "([A-Z0-9~]+)"')
+PROG_CALL_RE = re.compile('Prog "([A-Z0-9~]+)"')
+LBL_RE = re.compile('^Lbl ([A-Z0-9])$')
+LBL_F = 'Lbl {}'
+GOTO_F = 'Goto {}'
 
 
 class PartTypes(Enum):
@@ -100,6 +104,25 @@ def program_to_bide(program: ProgramPart) -> str:
     ]
     bide = '\n'.join(bide_lines)
     return bide
+
+
+def label_reassignment(programs: ProgramMap):
+    available = [*string.ascii_uppercase, *string.digits]
+
+    for p in programs.values():
+        contents = '\n'.join(p.contents)
+        all_lbls = LBL_RE.findall(contents)
+        for lbl_match in all_lbls:
+            try:
+                new_lbl = available.pop()
+            except IndexError as e:
+                raise IndexError('Out of labels') from e
+
+            old_lbl = lbl_match[1]
+            contents.replace(LBL_F.format(old_lbl), LBL_F.format(new_lbl))
+            contents.replace(GOTO_F.format(old_lbl), GOTO_F.format(new_lbl))
+
+        p.contents = contents.splitlines()
 
 
 def link_programs(programs: ProgramMap, entry_point_name: str) -> ProgramPart:
