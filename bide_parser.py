@@ -5,8 +5,7 @@ from enum import Enum
 from pathlib import Path
 
 
-# todo: check accuracy of prog name re
-PROG_CALL_RE = re.compile('Prog "([A-Z0-9~]+)"')
+PROG_CALL_RE = re.compile(r'Prog "([A-Z0-9\'"~{}\[\]rθ]+)"')
 LBL_RE = re.compile('^Lbl ([A-Z0-9])$', re.MULTILINE)
 LBL_F = 'Lbl {}'
 GOTO_F = 'Goto {}'
